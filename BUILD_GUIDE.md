@@ -33,6 +33,9 @@ Langkah pertama sebelum membangun Linux From Scratch (LFS) adalah mengonfigurasi
 
 ### 2. Partition Preparation
 ![Siapkan Partisi Seperti Ini](docs/screenshots/disk-allocation.png)
+- **sda 1 untuk host system (20-30GB)**
+- **sda 3 untuk swap (4-6GB)**
+- **sda 4 untuk lfs system (30-40GB)**
 
 ### 3. Download Sources with Wget
 Sistem LFS dibangun murni dari *source code* mentah. Semua *tarball* (paket aplikasi) dan *patches* harus dikumpulkan di dalam satu direktori yaitu `$LFS/sources`.
