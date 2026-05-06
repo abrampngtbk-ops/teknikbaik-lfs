@@ -32,7 +32,7 @@ Langkah pertama sebelum membangun Linux From Scratch (LFS) adalah mengonfigurasi
   ```
 
 ### 2. Partition Preparation
-![Siapkan Partisi Seperti Ini](disk-allocation.png)
+![Siapkan Partisi Seperti Ini](docs/screenshots/disk-allocation.png)
 
 ### 3. Download Sources with Wget
 Sistem LFS dibangun murni dari *source code* mentah. Semua *tarball* (paket aplikasi) dan *patches* harus dikumpulkan di dalam satu direktori yaitu `$LFS/sources`.
@@ -64,7 +64,7 @@ Fase ini dilakukan di lingkungan *Host* (Ubuntu) dengan *user* `lfs` untuk memba
 **Catatan Implementasi:**
 Seluruh langkah kompilasi pada fase ini merujuk pada pedoman resmi *Linux From Scratch Book*. Untuk efisiensi, dokumentasi *command lengkap*, dan kemudahan reproduksi sistem, kami telah merangkum seluruh perintah Phase 1 ke dalam skrip otomatisasi.
 * **Lihat Script:** [scripts/02-build-toolchain.sh](scripts/02-build-toolchain.sh)
-* **Entering Chroot & Building Additional Tools:** [chroot prep!](scripts/03-chroot-preparation.sh)
+* **Entering Chroot & Building Additional Tools:** [scripts/03-chroot-preparation.sh](scripts/03-chroot-preparation.sh)
 
 ### Phase 2 (LFS Chapter 7-11): System Base 
 Fase ini adalah membangun sistem operasi murni dari dalam lingkungan isolasi (Chroot). Sama halnya dengan Phase 1, perintah kompilasi untuk *Essential Packages* (seperti Coreutils, Bash, dll) kami rangkum dalam skrip otomatisasi.
@@ -74,7 +74,7 @@ Fase ini adalah membangun sistem operasi murni dari dalam lingkungan isolasi (Ch
 Kami melakukan penyesuaian konfigurasi kernel agar OS ini optimal sebagai *Web Server*.
 *   **Command:** `make menuconfig` lalu `make && make modules_install`
 *   **Optimasi:** Mengaktifkan dukungan jaringan (Networking), File System (Ext4), dan driver SATA/AHCI menjadi *Built-in* (`[*]`), bukan Modul (`[M]`), agar *server* dapat *booting* mandiri tanpa *initramfs*.
-*   **Konfigurasi Dasar:** [config-kernel](configs/kernel.config)
+*   **Konfigurasi Dasar:** [configs/kernel.configl](configs/kernel.config)
 
 ### Phase 3 (BLFS): Theme-Specific (Server OS)
 Fase ini adalah implementasi sistem operasi khusus untuk menjalankan *production web server*. Berikut adalah perintah spesifik yang kami eksekusi di dalam LFS:
@@ -212,22 +212,22 @@ systemctl enable mariadb php-fpm nginx cloudflared
 ### Common Errors dan Solusi
 
 * **Error M4 (`#error "Assumed value of MB_LEN_MAX wrong"`):** 
-![m4-Error](error-m4-compile.png)
+![m4-Error](docs/screenshots/error-m4-compile.png)
   * **Penyebab:** Terjadi saat fase *make* paket `m4`. Ini disebabkan oleh bentrok header C (glibc) antara sistem *Host* (Ubuntu 25.10) dengan lingkungan sementara LFS, atau *source code* M4 membutuhkan *patch* spesifik untuk versi Glibc yang baru.
   * **Solusi:** Hapus folder ekstrak `m4` yang *error*, ekstrak ulang dari berkas `.tar`, lalu pastikan untuk menjalankan perintah *sed* (manipulasi teks) bawaan dari panduan buku LFS untuk memperbaiki *file* `lib/stdio.in.h` sebelum menjalankan `./configure`. Pastikan juga *environment variable* tidak bocor dari OS Host.
 
 * **Error Chroot (`chroot: failed to run command '/usr/bin/env': No such file or directory`):**
-![Chroot-Error](error-chroot.png)
+![Chroot-Error](docs/screenshots/error-chroot.png)
   * **Penyebab:** Perintah gagal dijalankan saat mencoba masuk ke lingkungan *chroot* LFS. Sistem LFS tidak dapat menemukan program `env` di dalam `$LFS/usr/bin`. Ini biasanya terjadi karena pembuatan *symlink* direktori (seperti `/bin` ke `/usr/bin`) terlewat, atau kompilasi paket `coreutils` di fase *Temporary Tools* sebelumnya gagal/dilewati.
   * **Solusi:** Keluar dari *chroot*, periksa kembali direktori `$LFS/usr/bin`. Jika kosong, ulangi kompilasi paket `coreutils` pada fase *Cross Compiling Temporary Tools*, dan pastikan perintah pembuatan *symlink* awal dieksekusi dengan benar sebelum mencoba masuk *chroot* kembali.
 
 * **Kernel Panic / Crash Saat Kompilasi (Out of Memory):** 
-![Kernel-Panic](kernel-panic-php-compile.png)
+![Kernel-Panic](docs/screenshots/kernel-panic-php-compile.png)
   * **Penyebab:** Terjadi *crash* atau *Kernel Panic* secara tiba-tiba di tengah proses kompilasi paket berat seperti **PHP** dan **GCC**. Penyebab utamanya adalah kehabisan memori RAM (Out of Memory). Alokasi RAM untuk VirtualBox berada di batas minimum (6GB), sementara di sistem operasi *Host* (Windows) terdapat terlalu banyak *tab browser* dan aplikasi tidak penting yang terbuka. Hal ini menyebabkan bentrokan *resource* RAM, sehingga Kernel LFS mati mendadak.
   * **Solusi:** Matikan paksa (Power Off) VirtualBox. Sebelum menyalakan dan mengulangi kompilasi, tutup semua *browser* dan aplikasi berat di *Host* Windows untuk mengurangi penggunaan RAM Lalu Kompilasi Ulang Lagi. 
 
 * **Cloudflare Systemd Timeout (`Job for cloudflared.service failed because a timeout was exceeded`):** 
-![cloud-flare-service-config](cloudflare-service.png)
+![cloud-flare-service-config](docs/screenshots/cloudflare-service.png)
   * **Penyebab:** *Systemd* di LFS mencoba mematikan paksa `cloudflared` karena *service* tersebut diatur dengan `Type=notify`. Cloudflare gagal mengirimkan sinyal "active" kembali ke *Systemd*, sehingga dianggap *hang*.
   * **Solusi:** Edit file `/etc/systemd/system/cloudflared.service`. Ubah baris `Type=notify` menjadi `Type=simple`. Reload *Systemd* dengan perintah `systemctl daemon-reload`, lalu nyalakan ulang layanan cloudflarenya dengan `systemctl start cloudflared`.
 
