@@ -7,10 +7,54 @@
 * **CPU:** 2 cores minimum, 4 cores recommended
 
 ## Preparation Steps (LFS Chapter 2-4)
-1. Host system setup
-2. Partition preparation
-    ![Siapkan Partisi Seperti Ini](disk-allocation.png)
-3. Download sources with wget
+### 1. Host System Setup
+Langkah pertama sebelum membangun Linux From Scratch (LFS) adalah mengonfigurasi sistem *host*  agar memiliki lingkungan yang terisolasi dan *tools* kompilasi yang memadai.
+
+- **Persiapan Packages Host:** Pastikan *host* OS sudah memiliki *compiler* dan utilitas dasar yang diwajibkan oleh LFS. Eksekusi perintah berikut di terminal host:
+
+  ```bash
+  sudo apt update
+  sudo apt install build-essential bison gawk texinfo m4 python3 wget curl -y
+  ```
+
+- **Konfigurasi Environment Variable ($LFS):** Kita wajib mendefinisikan variabel `$LFS` yang menunjuk ke *mount point* partisi LFS kita agar perintah selanjutnya tidak salah target ke sistem host.
+
+```bash
+  export LFS=/mnt/lfs
+  ```
+
+- **Pembuatan User LFS Terisolasi:** Untuk mencegah *error* kompilasi yang merusak OS host, kita membuat *user* khusus bernama `lfs` tanpa akses `root`. Seluruh proses pembuatan *cross-compiler* sementara akan dilakukan oleh *user* ini.
+
+  ```bash
+  groupadd lfs
+  useradd -s /bin/bash -g lfs -m -k /dev/null lfs
+  passwd lfs
+  ```
+
+### 2. Partition Preparation
+![Siapkan Partisi Seperti Ini](disk-allocation.png)
+
+### 3. Download Sources with Wget
+Sistem LFS dibangun murni dari *source code* mentah. Semua *tarball* (paket aplikasi) dan *patches* harus dikumpulkan di dalam satu direktori yaitu `$LFS/sources`.
+
+- **Pembuatan Direktori Sources:**
+  Buat folder dan berikan hak akses agar bisa ditulis dan diakses secara global.
+
+  ```bash
+  mkdir -v $LFS/sources
+  chmod -v a+wt $LFS/sources
+  ```
+
+- **Mengunduh Wget-List & Seluruh Paket LFS:**
+   kita mengambil daftar tautan resmi (`wget-list`) lalu mengunduh semua daftar package yang dibutuhkan. Perintah `-c` (continue) digunakan agar unduhan yang gagal bisa dilanjutkan tanpa mengulang dari awal.
+
+  ```bash
+  # 1. Unduh daftar lengkap link source code LFS
+  wget [https://www.linuxfromscratch.org/lfs/view/stable/wget-list](https://www.linuxfromscratch.org/lfs/view/stable/wget-list) -O $LFS/sources/wget-list
+  
+  # 2. Eksekusi pengunduhan massal seluruh paket LFS
+  wget --input-file=$LFS/sources/wget-list --continue --directory-prefix=$LFS/sources
+  ```
 
 ## Build Process
 
@@ -20,15 +64,17 @@ Fase ini dilakukan di lingkungan *Host* (Ubuntu) dengan *user* `lfs` untuk memba
 **Catatan Implementasi:**
 Seluruh langkah kompilasi pada fase ini merujuk pada pedoman resmi *Linux From Scratch Book*. Untuk efisiensi, dokumentasi *command lengkap*, dan kemudahan reproduksi sistem, kami telah merangkum seluruh perintah Phase 1 ke dalam skrip otomatisasi.
 * **Lihat Script:** [scripts/02-build-toolchain.sh](scripts/02-build-toolchain.sh)
+* **Entering Chroot & Building Additional Tools:** [chroot prep!](scripts/03-chroot-preparation.sh)
 
 ### Phase 2 (LFS Chapter 7-11): System Base 
 Fase ini adalah membangun sistem operasi murni dari dalam lingkungan isolasi (Chroot). Sama halnya dengan Phase 1, perintah kompilasi untuk *Essential Packages* (seperti Coreutils, Bash, dll) kami rangkum dalam skrip otomatisasi.
-* **Lihat Script:** [scripts/03-build-system.sh](scripts/03-build-system.sh)
+* **Lihat Script:** [scripts/04-build-system.sh](scripts/04-build-system.sh)
 
 **Khusus Kompilasi Kernel:**
-Kami melakukan penyesuaian (*tuning*) konfigurasi kernel agar OS ini optimal sebagai *Web Server*.
+Kami melakukan penyesuaian konfigurasi kernel agar OS ini optimal sebagai *Web Server*.
 *   **Command:** `make menuconfig` lalu `make && make modules_install`
 *   **Optimasi:** Mengaktifkan dukungan jaringan (Networking), File System (Ext4), dan driver SATA/AHCI menjadi *Built-in* (`[*]`), bukan Modul (`[M]`), agar *server* dapat *booting* mandiri tanpa *initramfs*.
+*   **Konfigurasi Dasar:** [config-kernel](configs/kernel.config)
 
 ### Phase 3 (BLFS): Theme-Specific (Server OS)
 Fase ini adalah implementasi sistem operasi khusus untuk menjalankan *production web server*. Berikut adalah perintah spesifik yang kami eksekusi di dalam LFS:
@@ -133,7 +179,7 @@ make
 make install
 make install-mariadb
 
-# 4. Post-Installation & Hak Akses
+# d. Post-Installation & Hak Akses
 mkdir -p /srv/mariadb /etc/mysql
 chown -R mysql:mysql /srv/mariadb
 mariadb-install-db --user=mysql --basedir=/usr --datadir=/srv/mariadb
@@ -153,7 +199,7 @@ systemctl daemon-reload
 ```
 
 **5. Systemd Services (Autopilot)**
-Mendaftarkan seluruh servis "Tritunggal" (Nginx, PHP, MariaDB) beserta Cloudflare ke *Systemd* agar OS dapat beroperasi mandiri (*autopilot*) setiap kali komputer dihidupkan.
+Mendaftarkan servis Nginx, PHP, MariaDB beserta Cloudflare ke *Systemd* agar OS dapat beroperasi mandiri (*autopilot*) setiap kali komputer dihidupkan.
 ```bash
 systemctl enable mariadb php-fpm nginx cloudflared
 ```
@@ -166,26 +212,26 @@ systemctl enable mariadb php-fpm nginx cloudflared
 ### Common Errors dan Solusi
 
 * **Error M4 (`#error "Assumed value of MB_LEN_MAX wrong"`):** 
+![m4-Error](error-m4-compile.png)
   * **Penyebab:** Terjadi saat fase *make* paket `m4`. Ini disebabkan oleh bentrok header C (glibc) antara sistem *Host* (Ubuntu 25.10) dengan lingkungan sementara LFS, atau *source code* M4 membutuhkan *patch* spesifik untuk versi Glibc yang baru.
   * **Solusi:** Hapus folder ekstrak `m4` yang *error*, ekstrak ulang dari berkas `.tar`, lalu pastikan untuk menjalankan perintah *sed* (manipulasi teks) bawaan dari panduan buku LFS untuk memperbaiki *file* `lib/stdio.in.h` sebelum menjalankan `./configure`. Pastikan juga *environment variable* tidak bocor dari OS Host.
 
 * **Error Chroot (`chroot: failed to run command '/usr/bin/env': No such file or directory`):**
+![Chroot-Error](error-chroot.png)
   * **Penyebab:** Perintah gagal dijalankan saat mencoba masuk ke lingkungan *chroot* LFS. Sistem LFS tidak dapat menemukan program `env` di dalam `$LFS/usr/bin`. Ini biasanya terjadi karena pembuatan *symlink* direktori (seperti `/bin` ke `/usr/bin`) terlewat, atau kompilasi paket `coreutils` di fase *Temporary Tools* sebelumnya gagal/dilewati.
   * **Solusi:** Keluar dari *chroot*, periksa kembali direktori `$LFS/usr/bin`. Jika kosong, ulangi kompilasi paket `coreutils` pada fase *Cross Compiling Temporary Tools*, dan pastikan perintah pembuatan *symlink* awal dieksekusi dengan benar sebelum mencoba masuk *chroot* kembali.
 
 * **Kernel Panic / Crash Saat Kompilasi (Out of Memory):** 
-  * **Penyebab:** Terjadi *crash* atau *Kernel Panic* secara tiba-tiba di tengah proses kompilasi paket berat seperti **PHP** atau **GCC**. Penyebab utamanya adalah kehabisan memori RAM (Out of Memory). Alokasi RAM untuk VirtualBox berada di batas minimum (6GB), sementara di sistem operasi *Host* (Windows) terdapat terlalu banyak *tab browser* dan aplikasi tidak penting yang terbuka. Hal ini menyebabkan bentrokan *resource* RAM, sehingga Kernel LFS mati mendadak.
-  * **Solusi:** Matikan paksa (Power Off) VirtualBox. Sebelum menyalakan dan mengulangi kompilasi, tutup semua *browser* dan aplikasi berat di *Host* Windows untuk membebaskan RAM. Selain itu, kurangi beban CPU dengan menurunkan jumlah *thread* pada parameter `make` (misalnya dari `make -j4` menjadi `make -j2`).
-
-* **MariaDB User Error (`Unknown database 'db_pos'` / Gagal Start):** 
-  * **Penyebab:** Layanan MariaDB gagal menyimpan atau membaca *database* karena *folder* penyimpanannya dikunci oleh `root`, atau *user* sistem `mysql` belum didaftarkan di dalam OS LFS.
-  * **Solusi:** Buat grup dan pengguna khusus untuk database dengan perintah `groupadd -g 41 mysql` dan `useradd -c "MySQL Server" -d /srv/mariadb -g mysql -s /bin/false -u 40 mysql`. Setelah itu, inisialisasi ulang basis data dan ubah kepemilikan foldernya menggunakan perintah `chown -R mysql:mysql /srv/mariadb`.
+![Kernel-Panic](kernel-panic-php-compile.png)
+  * **Penyebab:** Terjadi *crash* atau *Kernel Panic* secara tiba-tiba di tengah proses kompilasi paket berat seperti **PHP** dan **GCC**. Penyebab utamanya adalah kehabisan memori RAM (Out of Memory). Alokasi RAM untuk VirtualBox berada di batas minimum (6GB), sementara di sistem operasi *Host* (Windows) terdapat terlalu banyak *tab browser* dan aplikasi tidak penting yang terbuka. Hal ini menyebabkan bentrokan *resource* RAM, sehingga Kernel LFS mati mendadak.
+  * **Solusi:** Matikan paksa (Power Off) VirtualBox. Sebelum menyalakan dan mengulangi kompilasi, tutup semua *browser* dan aplikasi berat di *Host* Windows untuk mengurangi penggunaan RAM Lalu Kompilasi Ulang Lagi. 
 
 * **Cloudflare Systemd Timeout (`Job for cloudflared.service failed because a timeout was exceeded`):** 
+![cloud-flare-service-config](cloudflare-service.png)
   * **Penyebab:** *Systemd* di LFS mencoba mematikan paksa `cloudflared` karena *service* tersebut diatur dengan `Type=notify`. Cloudflare gagal mengirimkan sinyal "active" kembali ke *Systemd*, sehingga dianggap *hang*.
-  * **Solusi:** Edit file `/etc/systemd/system/cloudflared.service`. Ubah baris `Type=notify` menjadi `Type=simple`. Beritahu *Systemd* tentang perubahan ini dengan mengetik `systemctl daemon-reload`, lalu nyalakan ulang layanannya dengan `systemctl start cloudflared`.
+  * **Solusi:** Edit file `/etc/systemd/system/cloudflared.service`. Ubah baris `Type=notify` menjadi `Type=simple`. Reload *Systemd* dengan perintah `systemctl daemon-reload`, lalu nyalakan ulang layanan cloudflarenya dengan `systemctl start cloudflared`.
 
 ### Verification Steps
 * **Cek Kernel:** Jalankan perintah `uname -a` untuk memastikan sistem berjalan menggunakan Kernel LFS hasil kompilasi mandiri.
-* **Cek Web Server:** Jalankan `systemctl status nginx` dan `systemctl status php-fpm`. Keduanya harus berstatus `active (running)`.
+* **Cek Web Server:** Jalankan `systemctl status nginx`, `systemctl status mariadb` dan `systemctl status php-fpm`. Ketiganya harus berstatus `active (running)`.
 * **Cek Tunnel:** Akses URL *website* dari HP atau perangkat lain. Jika halaman *login* POS terbuka tanpa *error* 500, maka *database* dan *web server* sudah terintegrasi sempurna.
