@@ -9,6 +9,7 @@
 ## Preparation Steps (LFS Chapter 2-4)
 1. Host system setup
 2. Partition preparation
+    ![Siapkan Partisi Seperti Ini](disk-allocation.png)
 3. Download sources with wget
 
 ## Build Process
@@ -18,11 +19,11 @@ Fase ini dilakukan di lingkungan *Host* (Ubuntu) dengan *user* `lfs` untuk memba
 
 **Catatan Implementasi:**
 Seluruh langkah kompilasi pada fase ini merujuk pada pedoman resmi *Linux From Scratch Book*. Untuk efisiensi, dokumentasi *command lengkap*, dan kemudahan reproduksi sistem, kami telah merangkum seluruh perintah Phase 1 ke dalam skrip otomatisasi.
-* **Lihat Script:** `scripts/02-build-toolchain.sh`
+* **Lihat Script:** [scripts/02-build-toolchain.sh](scripts/02-build-toolchain.sh)
 
 ### Phase 2 (LFS Chapter 7-11): System Base 
 Fase ini adalah membangun sistem operasi murni dari dalam lingkungan isolasi (Chroot). Sama halnya dengan Phase 1, perintah kompilasi untuk *Essential Packages* (seperti Coreutils, Bash, dll) kami rangkum dalam skrip otomatisasi.
-* **Lihat Script:** `scripts/03-build-system.sh`
+* **Lihat Script:** [scripts/03-build-system.sh](scripts/03-build-system.sh)
 
 **Khusus Kompilasi Kernel:**
 Kami melakukan penyesuaian (*tuning*) konfigurasi kernel agar OS ini optimal sebagai *Web Server*.
