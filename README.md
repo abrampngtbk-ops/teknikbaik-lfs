@@ -16,7 +16,7 @@
 ## 🎯 Tema Project
 **Tema 1: Server OS (Web Server)**
 
-Sistem operasi LFS ini dibangun dan dioptimalkan secara khusus untuk menjalankan lingkungan *web server* *production*. OS ini didesain *lightweight* tanpa *Graphical User Interface* (GUI), dan telah dikonfigurasi untuk menjalankan aplikasi POS (Point of Sales) secara *autopilot*.
+Sistem operasi LFS ini dibangun dan dioptimalkan secara khusus untuk menjalankan lingkungan *web server* *production*. OS ini didesain *lightweight* tanpa *Graphical User Interface* (GUI), dan telah dikonfigurasi untuk menjalankan aplikasi POS (Point of Sales) secara otomatis ketika lfs sistem dinyalakan.
 
 **Arsitektur Utama & Optimasi:**
 * Minimal packages (No GUI).
@@ -31,8 +31,8 @@ Repository ini berisi seluruh dokumentasi, skrip, dan konfigurasi yang digunakan
 
 * 📄 `BUILD_GUIDE.md`: Panduan komprehensif langkah demi langkah proses *build* LFS dari nol.
 * 📄 `SYSTEM_GUIDE.md`: Dokumentasi arsitektur sistem, daftar paket, dan konfigurasi *server*.
-* 📁 `scripts/`: Berisi skrip otomatisasi (bash) yang merepresentasikan tahapan *build*.
-* 📁 `configs/`: File konfigurasi penting (*kernel*, *fstab*, *network*).
+* 📁 `scripts/`: Berisi skrip bash yang merepresentasikan tahapan *build*.
+* 📁 `configs/`: File konfigurasi penting (*kernel-config*, *fstab*, *network*).
 * 📁 `packages/`: Daftar lengkap *package* beserta versinya.
 * 📁 `docs/`: Diagram arsitektur dan dokumentasi *screenshot*.
 

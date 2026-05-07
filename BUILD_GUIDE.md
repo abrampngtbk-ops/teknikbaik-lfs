@@ -1,14 +1,26 @@
 # Build Guide - Teknik Baik OS
 
+## Warning
+* **Bukan Proses *Copy-Paste*:** Membangun *Linux From Scratch* (LFS) bukanlah prosedur otomatis. Skrip dan perintah di dalam repositori ini mungkin tidak akan berjalan sempurna di sistem Anda tanpa penyesuaian. Faktor seperti lingkungan *host*, arsitektur perangkat keras, dan skema partisi sangat memengaruhi hasil kompilasi.
+* **Kompleksitas Sistem:** Keberhasilan pembangunan OS ini sangat bergantung pada ketelitian tingkat tinggi dalam menangani urutan dependensi *package*, konfigurasi *kernel* kustom, serta pengaturan *toolchain* (*temporary environment*). Kesalahan kecil atau ketidakcocokan versi pada satu tahap awal dapat menyebabkan kegagalan kompilasi (*build failure*) yang fatal pada tahap akhir.
+* **Rujukan Utama yang Diwajibkan:** Panduan ini tidak dirancang untuk menggantikan dokumentasi resmi. Untuk pemahaman yang komprehensif, linear, dan aman, kami mewajibkan pembaca dan pengembang untuk menjadikan **LFS Book** resmi sebagai pedoman absolut.
+
+**LFS BOOK PDF:** [https://www.linuxfromscratch.org/lfs/downloads/stable-systemd/LFS-BOOK-13.0-SYSD.pdf](https://www.linuxfromscratch.org/lfs/downloads/stable-systemd/LFS-BOOK-13.0-SYSD.pdf)
+**LFS FAQ:** [https://www.linuxfromscratch.org/lfs/faq.html](https://www.linuxfromscratch.org/lfs/faq.html)
+
 ## System Requirements
 * **Host OS:** Ubuntu 25.10 
 * **RAM:** 6GB minimum, 8GB+ recommended
 * **Disk:** 65GB free space
 * **CPU:** 2 cores minimum, 4 cores recommended
+* **Video Memory:** 128MB is sufficient
+* **
 
 ## Preparation Steps (LFS Chapter 2-4)
 ### 1. Host System Setup
-Langkah pertama sebelum membangun Linux From Scratch (LFS) adalah mengonfigurasi sistem *host*  agar memiliki lingkungan yang terisolasi dan *tools* kompilasi yang memadai.
+Langkah pertama sebelum membangun Linux From Scratch (LFS) adalah alokasi hardware sistem dan mengonfigurasi sistem *host*  agar memiliki lingkungan yang terisolasi dan *tools* kompilasi yang memadai.
+
+- **Alokasikan RAM, Disk, Cpu, Video Memory Sesuai Kebutuhan**
 
 - **Persiapan Packages Host:** Pastikan *host* OS sudah memiliki *compiler* dan utilitas dasar yang diwajibkan oleh LFS. Eksekusi perintah berikut di terminal host:
 
@@ -20,8 +32,32 @@ Langkah pertama sebelum membangun Linux From Scratch (LFS) adalah mengonfigurasi
 - **Konfigurasi Environment Variable ($LFS):** Kita wajib mendefinisikan variabel `$LFS` yang menunjuk ke *mount point* partisi LFS kita agar perintah selanjutnya tidak salah target ke sistem host.
 
 ```bash
+  sudo su -
+
   export LFS=/mnt/lfs
-  ```
+
+  mount -v -t ext4 /dev/sda4 $LFS
+  mount -v --bind /dev $LFS/dev
+  mount -vt devpts devpts -o gid=5,mode=0620 $LFS/dev/pts
+  mount -vt proc proc $LFS/proc
+  mount -vt sysfs sysfs $LFS/sys
+  mount -vt tmpfs tmpfs $LFS/run
+
+  if [ -h $LFS/dev/shm ]; then
+    install -v -d -m 1777 $LFS$(realpath /dev/shm)
+  else
+    mount -vt tmpfs -o nosuid,nodev tmpfs $LFS/dev/shm
+  fi
+
+  chroot "$LFS" /usr/bin/env -i   \
+      HOME=/root                  \
+      TERM="$TERM"                \
+      PS1='(lfs chroot) \u:\w\$ ' \
+      PATH=/usr/bin:/usr/sbin     \
+      MAKEFLAGS="-j$(nproc)"      \
+      TESTSUITEFLAGS="-j$(nproc)" \
+      /bin/bash --login
+    ```
 
 - **Pembuatan User LFS Terisolasi:** Untuk mencegah *error* kompilasi yang merusak OS host, kita membuat *user* khusus bernama `lfs` tanpa akses `root`. Seluruh proses pembuatan *cross-compiler* sementara akan dilakukan oleh *user* ini.
 
@@ -33,9 +69,9 @@ Langkah pertama sebelum membangun Linux From Scratch (LFS) adalah mengonfigurasi
 
 ### 2. Partition Preparation
 ![Siapkan Partisi Seperti Ini](docs/screenshots/disk-allocation.png)
-- **sda 1 untuk host system (20-30GB)**
-- **sda 3 untuk swap (4-6GB)**
-- **sda 4 untuk lfs system (30-40GB)**
+- **sda 1 untuk host system (30GB)**
+- **sda 3 untuk swap (4-5GB)**
+- **sda 4 untuk lfs system (30GB)**
 
 ### 3. Download Sources with Wget
 Sistem LFS dibangun murni dari *source code* mentah. Semua *tarball* (paket aplikasi) dan *patches* harus dikumpulkan di dalam satu direktori yaitu `$LFS/sources`.
@@ -65,12 +101,12 @@ Sistem LFS dibangun murni dari *source code* mentah. Semua *tarball* (paket apli
 Fase ini dilakukan di lingkungan *Host* (Ubuntu) dengan *user* `lfs` untuk membangun *compiler* silang (*cross-compiler*) dan alat-alat dasar sementara. 
 
 **Catatan Implementasi:**
-Seluruh langkah kompilasi pada fase ini merujuk pada pedoman resmi *Linux From Scratch Book*. Untuk efisiensi, dokumentasi *command lengkap*, dan kemudahan reproduksi sistem, kami telah merangkum seluruh perintah Phase 1 ke dalam skrip otomatisasi.
+Seluruh langkah kompilasi pada fase ini merujuk pada pedoman resmi *Linux From Scratch Book*. Untuk efisiensi, dokumentasi *command lengkap*, dan kemudahan reproduksi sistem, kami telah merangkum seluruh perintah Phase 1 ke dalam skrip bash.
 * **Lihat Script:** [scripts/02-build-toolchain.sh](scripts/02-build-toolchain.sh)
 * **Entering Chroot & Building Additional Tools:** [scripts/03-chroot-preparation.sh](scripts/03-chroot-preparation.sh)
 
 ### Phase 2 (LFS Chapter 7-11): System Base 
-Fase ini adalah membangun sistem operasi murni dari dalam lingkungan isolasi (Chroot). Sama halnya dengan Phase 1, perintah kompilasi untuk *Essential Packages* (seperti Coreutils, Bash, dll) kami rangkum dalam skrip otomatisasi.
+Fase ini adalah membangun sistem operasi murni dari dalam lingkungan isolasi (Chroot). Sama halnya dengan Phase 1, perintah kompilasi untuk *Essential Packages* (seperti Coreutils, Bash, dll) kami rangkum dalam skrip otomatisasi. **Peringatan!** script build-system ini tidak lengkap tolong tetap berpandu pada lfs book untuk melihat script apa yang perlu dijalankan.
 * **Lihat Script:** [scripts/04-build-system.sh](scripts/04-build-system.sh)
 
 **Khusus Kompilasi Kernel:**
@@ -202,7 +238,7 @@ systemctl daemon-reload
 ```
 
 **5. Systemd Services (Autopilot)**
-Mendaftarkan servis Nginx, PHP, MariaDB beserta Cloudflare ke *Systemd* agar OS dapat beroperasi mandiri (*autopilot*) setiap kali komputer dihidupkan.
+Mendaftarkan servis Nginx, PHP, MariaDB beserta Cloudflare ke *Systemd* agar OS dapat beroperasi mandiri setiap kali komputer dihidupkan.
 ```bash
 systemctl enable mariadb php-fpm nginx cloudflared
 ```
@@ -230,7 +266,7 @@ systemctl enable mariadb php-fpm nginx cloudflared
   * **Solusi:** Matikan paksa (Power Off) VirtualBox. Sebelum menyalakan dan mengulangi kompilasi, tutup semua *browser* dan aplikasi berat di *Host* Windows untuk mengurangi penggunaan RAM Lalu Kompilasi Ulang Lagi. 
 
 * **Cloudflare Systemd Timeout (`Job for cloudflared.service failed because a timeout was exceeded`):** 
-![cloud-flare-service-config](docs/screenshots/cloudflare-service.png)
+        `![cloud-flare-service-config](docs/screenshots/cloudflare-service.png)
   * **Penyebab:** *Systemd* di LFS mencoba mematikan paksa `cloudflared` karena *service* tersebut diatur dengan `Type=notify`. Cloudflare gagal mengirimkan sinyal "active" kembali ke *Systemd*, sehingga dianggap *hang*.
   * **Solusi:** Edit file `/etc/systemd/system/cloudflared.service`. Ubah baris `Type=notify` menjadi `Type=simple`. Reload *Systemd* dengan perintah `systemctl daemon-reload`, lalu nyalakan ulang layanan cloudflarenya dengan `systemctl start cloudflared`.
 
