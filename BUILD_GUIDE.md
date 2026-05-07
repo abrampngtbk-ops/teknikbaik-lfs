@@ -5,8 +5,9 @@
 * **Kompleksitas Sistem:** Keberhasilan pembangunan OS ini sangat bergantung pada ketelitian tingkat tinggi dalam menangani urutan dependensi *package*, konfigurasi *kernel* kustom, serta pengaturan *toolchain* (*temporary environment*). Kesalahan kecil atau ketidakcocokan versi pada satu tahap awal dapat menyebabkan kegagalan kompilasi (*build failure*) yang fatal pada tahap akhir.
 * **Rujukan Utama yang Diwajibkan:** Panduan ini tidak dirancang untuk menggantikan dokumentasi resmi. Untuk pemahaman yang komprehensif, linear, dan aman, kami mewajibkan pembaca dan pengembang untuk menjadikan **LFS Book** resmi sebagai pedoman absolut.
 
-**LFS BOOK PDF:** [https://www.linuxfromscratch.org/lfs/downloads/stable-systemd/LFS-BOOK-13.0-SYSD.pdf](https://www.linuxfromscratch.org/lfs/downloads/stable-systemd/LFS-BOOK-13.0-SYSD.pdf)
-**LFS FAQ:** [https://www.linuxfromscratch.org/lfs/faq.html](https://www.linuxfromscratch.org/lfs/faq.html)
+- **LFS BOOK PDF:** [https://www.linuxfromscratch.org/lfs/downloads/stable-systemd/LFS-BOOK-13.0-SYSD.pdf](https://www.linuxfromscratch.org/lfs/downloads/stable-systemd/LFS-BOOK-13.0-SYSD.pdf) 
+
+- **LFS FAQ:** [https://www.linuxfromscratch.org/lfs/faq.html](https://www.linuxfromscratch.org/lfs/faq.html)
 
 ## System Requirements
 * **Host OS:** Ubuntu 25.10 
@@ -113,7 +114,7 @@ Fase ini adalah membangun sistem operasi murni dari dalam lingkungan isolasi (Ch
 Kami melakukan penyesuaian konfigurasi kernel agar OS ini optimal sebagai *Web Server*.
 *   **Command:** `make menuconfig` lalu `make && make modules_install`
 *   **Optimasi:** Mengaktifkan dukungan jaringan (Networking), File System (Ext4), dan driver SATA/AHCI menjadi *Built-in* (`[*]`), bukan Modul (`[M]`), agar *server* dapat *booting* mandiri tanpa *initramfs*.
-*   **Konfigurasi Dasar:** [configs/kernel.configl](configs/kernel.config)
+*   **Konfigurasi Dasar:** [configs/kernel.config](configs/kernel.config)
 
 ### Phase 3 (BLFS): Theme-Specific (Server OS)
 Fase ini adalah implementasi sistem operasi khusus untuk menjalankan *production web server*. Berikut adalah perintah spesifik yang kami eksekusi di dalam LFS:
