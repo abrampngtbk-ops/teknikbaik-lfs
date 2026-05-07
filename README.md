@@ -37,7 +37,7 @@ Repository ini berisi seluruh dokumentasi, skrip, dan konfigurasi yang digunakan
 * 📁 `docs/`: Diagram arsitektur dan dokumentasi *screenshot*.
 
 ## 🔗 Quick Links
-* Demonstrasi Video Youtube: 
+* Demonstrasi Video Youtube: https://youtu.be/b9AsX1M1hl0?si=7uh48LdDTJ1hs_Xf
 * Link Akses Web POS: https://pos-lfs-teknikbaik.ngd.my.id/
 
 ---
