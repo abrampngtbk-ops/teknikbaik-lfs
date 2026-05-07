@@ -271,7 +271,7 @@ systemctl enable mariadb php-fpm nginx cloudflared
 
 * **Cloudflare Systemd Timeout (`Job for cloudflared.service failed because a timeout was exceeded`):** 
 
-                `![cloud-flare-service-config](docs/screenshots/cloudflare-service.png)
+       `![cloud-flare-service-config](docs/screenshots/cloudflare-service.png)
   * **Penyebab:** *Systemd* di LFS mencoba mematikan paksa `cloudflared` karena *service* tersebut diatur dengan `Type=notify`. Cloudflare gagal mengirimkan sinyal "active" kembali ke *Systemd*, sehingga dianggap *hang*.
   * **Solusi:** Edit file `/etc/systemd/system/cloudflared.service`. Ubah baris `Type=notify` menjadi `Type=simple`. Reload *Systemd* dengan perintah `systemctl daemon-reload`, lalu nyalakan ulang layanan cloudflarenya dengan `systemctl start cloudflared`.
 
