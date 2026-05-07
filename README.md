@@ -24,7 +24,7 @@ Sistem operasi LFS ini dibangun dan dioptimalkan secara khusus untuk menjalankan
 * Runtime: **PHP-FPM**.
 * Database: **MariaDB**.
 * Networking & Security: **Cloudflared & Firewall** 
-* Init Linux System: **Systemd 13.0** 
+* Init Linux System: **Systemd 13.0 (259.1)** 
 
 ## 📂 Struktur Repository
 Repository ini berisi seluruh dokumentasi, skrip, dan konfigurasi yang digunakan selama proses pembangunan LFS:
