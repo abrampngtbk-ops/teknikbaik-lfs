@@ -1,4 +1,4 @@
-# 🚀 TeknikBaik OS (Linux From Scratch)
+# 🚀 Teknik Baik OS (Linux From Scratch)
 
 **Proyek UTS: Membangun Sistem Operasi Custom Berbasis Linux From Scratch (LFS)**
 * **Mata Kuliah:** Sistem Operasi
