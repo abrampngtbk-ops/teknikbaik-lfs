@@ -41,5 +41,5 @@ Repository ini berisi seluruh dokumentasi, skrip, dan konfigurasi yang digunakan
 * Link Akses Web POS: https://pos-lfs-teknikbaik.ngd.my.id/
 
 ---
-*Dibuat oleh Tim TeknikBaik.*
-*"You don't truly understand something until you can build it from scratch."*
+
+*"You don't truly understand something until you can build it from scratch."* - *Dibuat oleh Tim Teknik Baik*
