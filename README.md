@@ -19,11 +19,11 @@
 Sistem operasi LFS ini dibangun dan dioptimalkan secara khusus untuk menjalankan lingkungan *web server* *production*. OS ini didesain *lightweight* tanpa *Graphical User Interface* (GUI), dan telah dikonfigurasi untuk menjalankan aplikasi POS (Point of Sales) secara otomatis ketika lfs sistem dinyalakan.
 
 **Arsitektur Utama & Optimasi:**
-* Minimal packages (No GUI).
+* Minimal packages (No GUI)
 * Web Server: **Nginx** 
-* Runtime: **PHP-FPM**.
-* Database: **MariaDB**.
-* Networking & Security: **Cloudflared & Firewall** 
+* Runtime: **PHP-FPM**
+* Database: **MariaDB**
+* Networking & Security: **Cloudflared/Wireguard VPN & Firewall** 
 * Init Linux System: **Systemd 13.0 (259.1)** 
 
 ## 📂 Struktur Repository
