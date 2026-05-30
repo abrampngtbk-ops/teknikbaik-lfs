@@ -1,4 +1,4 @@
-# 🚀 TeknikBaik OS (Linux From Scratch)
+# 🚀 Teknik Baik OS (Linux From Scratch & Beyond Linux From Scratch) 
 
 **Proyek UTS: Membangun Sistem Operasi Custom Berbasis Linux From Scratch (LFS)**
 * **Mata Kuliah:** Sistem Operasi
@@ -19,11 +19,11 @@
 Sistem operasi LFS ini dibangun dan dioptimalkan secara khusus untuk menjalankan lingkungan *web server* *production*. OS ini didesain *lightweight* tanpa *Graphical User Interface* (GUI), dan telah dikonfigurasi untuk menjalankan aplikasi POS (Point of Sales) secara otomatis ketika lfs sistem dinyalakan.
 
 **Arsitektur Utama & Optimasi:**
-* Minimal packages (No GUI).
+* Minimal packages (No GUI)
 * Web Server: **Nginx** 
 * Runtime: **PHP-FPM**.
 * Database: **MariaDB**.
-* Networking & Security: **Cloudflared, Firewall (Iptables), & WireGuard VPN** 
+* Networking & Security: **Cloudflared & Firewall** 
 * Init Linux System: **Systemd 13.0 (259.1)** 
 
 ## 📂 Struktur Repository
@@ -41,5 +41,5 @@ Repository ini berisi seluruh dokumentasi, skrip, dan konfigurasi yang digunakan
 * Link Akses Web POS: https://pos-lfs-teknikbaik.ngd.my.id/
 
 ---
-*Dibuat oleh Tim TeknikBaik.*
-*"You don't truly understand something until you can build it from scratch."*
+
+*"You don't truly understand something until you can build it from scratch."* - *Dibuat oleh Tim Teknik Baik*
