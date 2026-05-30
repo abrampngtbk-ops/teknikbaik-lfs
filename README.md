@@ -23,7 +23,7 @@ Sistem operasi LFS ini dibangun dan dioptimalkan secara khusus untuk menjalankan
 * Web Server: **Nginx** 
 * Runtime: **PHP-FPM**.
 * Database: **MariaDB**.
-* Networking & Security: **Cloudflared & Firewall** 
+* Networking & Security: **Cloudflared, Firewall (iptables), & WireGuard VPN** 
 * Init Linux System: **Systemd 13.0 (259.1)** 
 
 ## 📂 Struktur Repository
