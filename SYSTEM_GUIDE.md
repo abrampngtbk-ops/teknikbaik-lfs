@@ -53,6 +53,7 @@ TeknikBaik OS menerapkan prinsip *Defense in Depth* (Pertahanan Berlapis) untuk 
 5. **Information Security & Service Hardening:** Layanan Nginx dan PHP-FPM dijalankan oleh *user non-root* (`nginx`). *Server tokens* dan eksposur versi PHP di *HTTP Headers* telah dihilangkan. Selain itu, hak akses kepemilikan direktori web telah dibatasi dan *file debugging* telah dihapus untuk mencegah *Information Disclosure*.
 6. **Zero Trust Tunneling & Credential Protection:** Menggunakan layanan Cloudflared untuk merutekan lalu lintas web melalui *tunnel* aman, mencegah penyerang mengetahui IP asli server. Token autentikasi diisolasi menggunakan *Environment Variables* agar tidak bocor pada pemantauan proses sistem.
 7. **Active Defense (Mini-IPS):** Mengimplementasikan skrip *Intrusion Prevention System* kustom yang memantau *log* autentikasi. Sistem ini secara otomatis memblokir alamat IP penyerang pada level *firewall* jika terdeteksi melakukan serangan *brute-force* pada layanan SSH.
+8. **Secure Remote Administration:** Mengimplementasikan jaringan privat virtual (WireGuard VPN) dengan membuat terowongan komunikasi terenkripsi pada antarmuka terisolasi (wg0), dan hanya mengizinkan akses masuk administratif (SSH) bagi klien yang memiliki Private Key kriptografi valid.
 
 ## Performance Benchmarks
 Berikut adalah penggunaan *resource* saat *server* berjalan secara *idle*:

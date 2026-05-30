@@ -23,15 +23,15 @@ Sistem operasi LFS ini dibangun dan dioptimalkan secara khusus untuk menjalankan
 * Web Server: **Nginx** 
 * Runtime: **PHP-FPM**.
 * Database: **MariaDB**.
-* Networking & Security: **Cloudflared & Firewall** 
+* Networking & Security: **Cloudflared, Firewall (Iptables), & WireGuard VPN** 
 * Init Linux System: **Systemd 13.0 (259.1)** 
 
 ## 📂 Struktur Repository
 Repository ini berisi seluruh dokumentasi, skrip, dan konfigurasi yang digunakan selama proses pembangunan LFS:
 
-* 📄 `BUILD_GUIDE.md`: Panduan komprehensif langkah demi langkah proses *build* LFS dari nol.
+* 📄 `BUILD_GUIDE.md`: Panduan proses *building* LFS dari nol.
 * 📄 `SYSTEM_GUIDE.md`: Dokumentasi arsitektur sistem, daftar paket, dan konfigurasi *server*.
-* 📁 `scripts/`: Berisi skrip bash yang merepresentasikan tahapan *build*.
+* 📁 `scripts/`: Berisi skrip bash yang merepresentasikan tahapan *build & cleanup*.
 * 📁 `configs/`: File konfigurasi penting (*kernel-config*, *fstab*, *network*).
 * 📁 `packages/`: Daftar lengkap *package* beserta versinya.
 * 📁 `docs/`: Diagram arsitektur dan dokumentasi *screenshot*.
