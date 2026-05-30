@@ -20,7 +20,7 @@ truncate -s 0 /var/lib/dbus/machine-id
 # 6. Membersihkan seluruh file sementara
 rm -rf /tmp/* /var/tmp/*
 
-# 7. Menghapus skrip ini sendiri agar tidak terbaca oleh penerima file
+# 7. Menghapus skrip ini sendiri 
 rm -f /root/cleanup.sh
 
 # 8. Membersihkan riwayat perintah terminal
