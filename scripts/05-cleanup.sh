@@ -1,32 +1,39 @@
 #!/bin/bash
 
-# 1. Menghapus konfigurasi dan kunci VPN WireGuard
+# 1. Reset account passwords to default values for public distribution
+echo "root:root" | chpasswd
+echo "posadmin:posadmin" | chpasswd
+
+# 2. Remove WireGuard configurations and keys
 rm -rf /etc/wireguard/*
 systemctl disable wg-quick@wg0
 
-# 2. Menghapus Token Cloudflare (Mengosongkan nilai di dalam tanda kutip)
+# 3. Clear Cloudflare Tunnel token value
 sed -i 's/Environment="TUNNEL_TOKEN=.*"/Environment="TUNNEL_TOKEN="/g' /etc/systemd/system/cloudflared.service
 
-# 3. Menghapus kunci unik SSH Server
+# 4. Remove unique SSH server host keys and user authorized keys
 rm -f /etc/ssh/ssh_host_*
+rm -f /root/.ssh/authorized_keys
+rm -f /home/posadmin/.ssh/authorized_keys
 
-# 4. Mengosongkan isi file log tanpa menghapus direktori
+# 5. Clear log files without deleting the parent directories
 find /var/log -type f -exec truncate -s 0 {} \;
 
-# 5. Mengosongkan ID unik mesin
+# 6. Clear unique machine identification numbers
 truncate -s 0 /etc/machine-id
 truncate -s 0 /var/lib/dbus/machine-id
 
-# 6. Membersihkan seluruh file sementara
+# 7. Clean all temporary system files
 rm -rf /tmp/* /var/tmp/*
 
-# 7. Menghapus skrip ini sendiri 
+# 8. Remove this cleanup script itself
 rm -f /root/cleanup.sh
 
-# 8. Membersihkan riwayat perintah terminal
+# 9. Clear terminal command history for all users
 rm -f /root/.bash_history
+rm -f /home/posadmin/.bash_history
 history -c
 unset HISTFILE
 
-# Mematikan mesin secara langsung
+# 10. Power off the machine immediately to preserve the clean state
 poweroff
