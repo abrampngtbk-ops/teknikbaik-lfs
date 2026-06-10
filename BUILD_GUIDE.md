@@ -269,12 +269,6 @@ systemctl enable mariadb php-fpm nginx cloudflared
   * **Penyebab:** Terjadi *crash* atau *Kernel Panic* secara tiba-tiba di tengah proses kompilasi paket berat seperti **PHP** dan **GCC**. Penyebab utamanya adalah kehabisan memori RAM (Out of Memory). Alokasi RAM untuk VirtualBox berada di batas minimum (6GB), sementara di sistem operasi *Host* (Windows) terdapat terlalu banyak *tab browser* dan aplikasi tidak penting yang terbuka. Hal ini menyebabkan bentrokan *resource* RAM, sehingga Kernel LFS mati mendadak.
   * **Solusi:** Matikan paksa (Power Off) VirtualBox. Sebelum menyalakan dan mengulangi kompilasi, tutup semua *browser* dan aplikasi berat di *Host* Windows untuk mengurangi penggunaan RAM Lalu Kompilasi Ulang Lagi. 
 
-* **Cloudflare Systemd Timeout (`Job for cloudflared.service failed because a timeout was exceeded`):** 
-
-`![cloud-flare-service-config](docs/screenshots/cloudflare-service.png)
-  * **Penyebab:** *Systemd* di LFS mencoba mematikan paksa `cloudflared` karena *service* tersebut diatur dengan `Type=notify`. Cloudflare gagal mengirimkan sinyal "active" kembali ke *Systemd*, sehingga dianggap *hang*.
-  * **Solusi:** Edit file `/etc/systemd/system/cloudflared.service`. Ubah baris `Type=notify` menjadi `Type=simple`. Reload *Systemd* dengan perintah `systemctl daemon-reload`, lalu nyalakan ulang layanan cloudflarenya dengan `systemctl start cloudflared`.
-
 ### Verification Steps
 * **Cek Kernel:** Jalankan perintah `uname -a` untuk memastikan sistem berjalan menggunakan Kernel LFS hasil kompilasi mandiri.
 * **Cek Web Server:** Jalankan `systemctl status nginx`, `systemctl status mariadb` dan `systemctl status php-fpm`. Ketiganya harus berstatus `active (running)`.
